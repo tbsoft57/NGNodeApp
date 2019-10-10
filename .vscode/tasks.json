@@ -1,0 +1,19 @@
+{ // Consultez https://go.microsoft.com/fwlink/?LinkId=733558
+  "version": "2.0.0",
+  "tasks": [
+    { "label": " 1 Start",               "dependsOn": ["Θ1 nodemon", "Θ1 ngServe"]},
+    { "label": "Θ1 nodemon",             "command":   "nodemon", "type": "shell", "presentation": {"group": "split"}},
+    { "label": "Θ1 ngServe",             "command":   "ng serve --open=true", "type": "shell", "presentation": {"group": "split"}},
+    { "label": " 2 Build",               "command":   "ng build --configuration=production", "type": "shell" },
+    { "label": " 3 GitCommitPush"        "command":   "bashLocal/gitCommitPush", "type": "shell"},
+    { "label": " 4 Publish",             "command":   "bashLocal/htmlClean ; bashLocal/htmlRsync ; bashLocal/srcRsync ; bashLocal/bashRsync ; bashLocal/jsonMdRsync", "type": "shell"},
+    { "label": " 5 BuildAndPublish",     "command":   "ng build --configuration=production ; bashLocal/htmlClean ; bashLocal/htmlRsync ; bashLocal/srcRsync ; bashLocal/bashRsync ; bashLocal/jsonMdRsync", "type": "shell" },
+    { "label": " 6 LocalInstallModules", "command":   "npm install", "type": "shell" },
+    { "label": " 7 OvhInstallModules",   "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/installModules'", "type": "shell"},
+    { "label": " 8 OvhStartApp",         "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/startApp'", "type": "shell"},
+    { "label": " 9 OvhStartDebug",       "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/startDebug'", "type": "shell"},
+    { "label": "10OvhappLog",           "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/appLog'", "type": "shell"},
+    { "label": "11 OvhflushLog",         "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/flushLog'", "type": "shell"},
+    { "label": "12 OvhflushLogs",        "command":   "ssh ${SSL_USER} -p ${SSL_PORT} 'cd /home/thierry/app1 ; ./bash/flushLogs'", "type": "shell"},
+  ]
+}

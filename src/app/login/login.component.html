@@ -1,0 +1,21 @@
+<mat-card>
+  <mat-card-content>
+    <mat-form-field>
+      <input matInput type="text" placeholder="User" [(ngModel)]="login">
+      <button mat-button *ngIf="login" matSuffix mat-icon-button (click)="login=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <br>
+    <mat-form-field>
+      <input matInput type="text" placeholder="Password" [(ngModel)]="pass">
+      <button mat-button *ngIf="pass" matSuffix mat-icon-button (click)="pass=''">
+        <mat-icon>close</mat-icon>
+      </button>
+    </mat-form-field>
+    <br>
+    <button mat-raised-button (click)="logIn();">Se connecter</button>
+  </mat-card-content>
+  <br>
+  <span>{{status}}</span>
+</mat-card>

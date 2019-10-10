@@ -1,0 +1,8 @@
+<mat-card>
+  <mat-card-content>
+    <p *ngFor="let client of client.all">{{client | json}}</p>
+    <button mat-raised-button (click)="client.getById(1);">Get 1</button>
+    <button mat-raised-button (click)="client.getAll();">Get All</button>
+    <button mat-raised-button (click)="postTest();">POST</button>
+  </mat-card-content>
+</mat-card>

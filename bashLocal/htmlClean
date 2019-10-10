@@ -1,0 +1,5 @@
+#!/bin/bash
+echo htmlClean begins
+ssh ${SSL_USER} -p ${SSL_PORT} 'rm -r /home/thierry/app1/html/*'
+echo htmlClean ends
+echo

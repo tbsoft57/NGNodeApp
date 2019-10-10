@@ -1,0 +1,38 @@
+{
+  "git.ignoreLimitWarning": true,
+  "sqltools.connections": [
+    {
+      "connectionTimeout": 30,
+      "database": "tbsoft",
+      "dialect": "MySQL",
+      "name": "MySQL",
+      "password": "TB04011966",
+      "port": 3306,
+      "server": "127.0.0.1",
+      "username": "root"
+    },
+    {
+      "database": "BiblioTec",
+      "dialect": "MSSQL",
+      "name": "MsSql",
+      "password": "tB04011966!",
+      "port": 1433,
+      "server": "localhost",
+      "username": "sa"
+    }
+  ],
+  "files.exclude": {
+    "pid": true,
+    "package-lock.json": true,
+    ".editorconfig": true,
+    ".git": true,
+    ".vscode": true,
+    "node_modules": true,
+    "sqlite": true,
+    "bash": true,
+    "html": true,
+    "bashLocal": true,
+    ".gitignore": true,
+    "localStorageLogin": true
+  }
+}

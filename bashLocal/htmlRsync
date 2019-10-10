@@ -1,0 +1,5 @@
+#!/bin/bash
+echo htmlRsync begins
+rsync -rvz -e 'ssh -p '${SSL_PORT} html/* ${SSL_USER}:/home/thierry/app1/html --progress
+echo htmlRsync ends
+echo

@@ -1,0 +1,40 @@
+<button mat-button></button>
+<div ngClass="light-theme" fxLayout="column">
+  <div fxLayout="row">
+    <h1><img src="favicon.ico"> {{app.pageTitle}}</h1>
+  </div>
+  <div fxLayout="row">
+    <nav fxLayout="column" class="notprint">
+      <ul>
+        <li>
+          <a class="mat-raised-button" routerLink="/">Acceuil</a>
+        </li>
+        <li>
+          <a class="mat-raised-button" routerLink="/public">Public</a>
+        </li>
+        <li>
+          <a class="mat-raised-button" routerLink="/contact">Contact</a>
+        </li>
+        <li *ngIf="app.user !== null">
+          <a class="mat-raised-button" routerLink="/private">Private</a>
+        </li>
+        <li *ngIf="app.user == null">
+          <a class="mat-raised-button" routerLink="/login">Login</a>
+        </li>
+        <li *ngIf="app.user !== null">
+          <a class="mat-raised-button" routerLink="/logout">Logout</a>
+        </li>
+        <li *ngIf="app.user !== null">
+          <a class="mat-raised-button" routerLink="/user">User</a>
+        </li>
+        <li>
+          <a class="mat-raised-button" routerLink="/client">Client</a>
+        </li>
+        <li *ngIf="app.user !== null">Hello {{app.user.name}}</li>
+      </ul>
+    </nav>
+    <div fxLayout="column" fxFlex fxFlexOffset="10px">
+      <router-outlet></router-outlet>
+    </div>
+  </div>
+</div>

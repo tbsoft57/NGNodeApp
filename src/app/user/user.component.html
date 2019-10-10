@@ -1,0 +1,8 @@
+<mat-card>
+  <mat-card-content>
+    <p *ngFor="let user of user.all">{{user | json}}</p>
+    <button mat-raised-button (click)="user.getById(1);">Get 1</button>
+    <button mat-raised-button (click)="user.getAll();">Get All</button>
+  </mat-card-content>
+</mat-card>
+
