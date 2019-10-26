@@ -26,7 +26,6 @@
     "package-lock.json": true,
     ".editorconfig": true,
     ".git": true,
-    ".vscode": true,
     "sqlite": true,
     "bash": true,
     "html": true,
@@ -34,6 +33,21 @@
     ".gitignore": true,
     "localStorageLogin": true,
     "tests/tsconfig.json": true,
-    "node_modules": true
+    "node_modules": true,
+    ".vscode": true
+  },
+  "todo-tree.highlights.customHighlight": {
+    "TODO": {
+      "icon": "check",
+      "iconColour": "yellow",
+      "foreground": "black",
+      "background": "yellow"
+    },
+    "FIXME": {
+      "icon": "beaker",
+      "iconColour": "red",
+      "foreground": "white",
+      "background": "red"
+    }
   }
 }

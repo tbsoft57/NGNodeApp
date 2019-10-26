@@ -15,7 +15,7 @@ Mon texte `code` fin de mon texte
 Mon code PHP en couleurs
 sur plusieurs lignes
 ```
-
+README
     Première ligne de code
     Deuxième ligne
 
@@ -23,18 +23,17 @@ sur plusieurs lignes
 
 Premier paragraphe
 
-Deuxième paragraphe   
-
-* Pommes
-* Poires
-    * Sous élément avec au moins quatre espaces devant.
+Deuxième paragraphe   README
+README
+* PommesREADME
+* PoiresREADME
+    * Sous élément avec au moins quatre espaces devaREADMEnt.
 
 1. mon premier
 2. mon deuxième
 
-- [ ] Case non cochée
+- [] Case non cochée
 - [x] Case cochée
-
 
 | Titre 1       |     Titre 2     |        Titre 3 |
 | :------------ | :-------------: | -------------: |
@@ -44,3 +43,4 @@ Deuxième paragraphe
 
 
 ![Texte alternatif](url_de_l'image "texte pour le titre, facultatif")
+

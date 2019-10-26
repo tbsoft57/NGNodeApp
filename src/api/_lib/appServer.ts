@@ -9,6 +9,7 @@ import * as cors from 'cors';
 import * as fs from 'fs.promises';
 import * as path from 'path';
 
+// FIXME - fix something2
 import { v4 as uuid } from 'uuid';
 import { createConnection, Connection, ConnectionOptions } from 'typeorm';
 
@@ -17,6 +18,7 @@ import { User } from '../entities/user';
 import * as error from './appError';
 import { exists } from 'fs';
 
+// TODO - todo note
 export class AppServer {
 
   public  static devMode = (process.env.NODE_ENV === 'DEVELOPMENT');
@@ -27,6 +29,7 @@ export class AppServer {
   private static PrivateRouter = express.Router().get('/privateTest', async (req, res) => { res.json({ text: 'Private Router works' }); });
   private static PublicRouter = express.Router().get('/publicTest', async (req, res) => { res.json({ text: 'Public Router works' }); });
 
+  // FIXME - fix something
   public static async start(sqlServer = process.env.NODE_SQLSERVER || 'sqljs', port = process.env.NODE_PORT || '4201', app = express()) {
     console.log(`\n${environment.appName} starts Pid=${process.pid} Env=${process.env.NODE_ENV} Debug=${this.devMode} SqlServer=${sqlServer} NodeHttpPort=${port} Cwd=${process.cwd()}`);
     await fs.writeFile('pid', process.pid);
