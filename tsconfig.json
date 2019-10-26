@@ -1,25 +1,19 @@
 {
   "compileOnSave": false,
   "compilerOptions": {
-    "baseUrl": ".",
-    "outDir": "./dist/out-tsc",
-    "typeRoots": ["node_modules/@types"],
-    "lib": ["es2015", "dom"],
-    "target": "es2015",
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "sourceMap": true,
-    "declaration": false,
-    "downlevelIteration": true,
-    "emitDecoratorMetadata": true,
-    "experimentalDecorators": true,
-    "importHelpers": true
+    "target": "es2015",               // Target la dernière version de EcmaScript (OK pour node)
+    "module": "commonjs",             // les modules ES (export function example() <-> import {example } from 'example') sont transpilés en modules node commonjs (exports.example = function() <-> ex = require('example'))
+    "moduleResolution": "node",       // La strategie de recherche des modules est celle de node (celle de TS càd "classic" n'est plus utilisée)
+    "sourceMap": true,                // Le build génère le fichier .map qui permet au degguger de retrouver la source TS et la ligne correspondante
+    "downlevelIteration": true,       // permet d'utiliser les iterables for-of
+    "emitDecoratorMetadata": true,    // Permet d'utiliser les décorateurs (ex:@Entity(), @Column() pour typeOrm) sur les classes et methodes
+    "experimentalDecorators": true,   // Va de pair avec ci-dessus, on ne peut pas mettre l'un a true sans mettre egalement l'autre.
+                                      // --> necéssite également d'importer "reflect-metadata"
   },
   "angularCompilerOptions": {
-    "fullTemplateTypeCheck": true,
-    "strictInjectionParameters": true
+    "fullTemplateTypeCheck": true,    // Permet de vérifier les bindings dans les templates (uniquement lors d'un ng build pas avec ng serve)
+    "strictInjectionParameters": true // Verifie si le type des arguments passés dans la classe marquée avec @Injectable peut être déterminé
   },
-  "files": ["src/main.ts", "src/polyfills.ts"],
-  "include": ["src/**/*.ts"],
-  "exclude": ["src/api"]
+  "include": ["src/**/*.ts"],         // Fichiers a transpiler
+  "exclude": ["src/api"]              // Fichiers a exclure de la transpilation
 }

@@ -1,4 +1,4 @@
-import { AppError } from './_lib/appError';
+import { appError } from './_lib/appError';
 export * from './_lib/appError';
 
-export class myError extends AppError { constructor() { super(100, 500, 'Erreur de test!', 'myError'); } }
+export class myError extends appError { constructor() { super(100, 500, 'Erreur de test!', 'myError'); } }

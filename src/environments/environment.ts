@@ -1,5 +1,6 @@
 export const environment = {
   production: false,
   appName: 'NGNodeApp',
-  apiPrefix: 'api'
+  apiPrefix: 'api',
+  apiHost: 'http://localhost:4000'
 };

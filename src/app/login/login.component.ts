@@ -19,7 +19,7 @@ export class LoginComponent extends LoginVm {
 
   constructor(public http: HttpClient) { super(); }
 
-  logIn() {
+  async logIn() {
     this.http.post<User>('login', this).subscribe(
     User => { this.status = 'Loged In'; app.user = User; },
     HttpErrorResponse => { console.log(HttpErrorResponse); this.status = HttpErrorResponse.error.message; });

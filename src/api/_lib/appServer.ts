@@ -2,10 +2,10 @@ import 'reflect-metadata';
 import 'zone.js/dist/zone-node';
 import * as express from 'express';
 import * as session from 'express-session';
+import * as bcrypt from 'bcryptjs';
 import * as cookieParser from 'cookie-parser';
 import * as bodyParser from 'body-parser';
 import * as cors from 'cors';
-import * as bcrypt from 'bcrypt';
 import * as fs from 'fs.promises';
 import * as path from 'path';
 
@@ -15,47 +15,46 @@ import { createConnection, Connection, ConnectionOptions } from 'typeorm';
 import { environment } from '../../environments/backend';
 import { User } from '../entities/user';
 import * as error from './appError';
+import { exists } from 'fs';
 
 export class AppServer {
 
+  public  static devMode = (process.env.NODE_ENV === 'DEVELOPMENT');
+  private static debugStart: number = (process.env.NODE_ENV === 'DEVELOPMENT') ? 0 : -1;
+  private static debugScope: string = '';
   private static httpServerInstance;
-  private static debugScope: string;
-  private static debugStart: number;
   private static connectionPool: Connection;
   private static PrivateRouter = express.Router().get('/privateTest', async (req, res) => { res.json({ text: 'Private Router works' }); });
   private static PublicRouter = express.Router().get('/publicTest', async (req, res) => { res.json({ text: 'Public Router works' }); });
 
-  public static async start(sqlServer = 'sqljs', port = '4201', app = express()) {
-    this.debugLog('AppServer:start', `start(${sqlServer}, ${port})`);
-    await fs.writeFile('pid', process.pid);  await this.createConnectionPool(sqlServer);
-    if (process.env.NODE_SQLSERVER) sqlServer = process.env.NODE_SQLSERVER;
-    if (process.env.NODE_PORT) port = process.env.NODE_PORT;
-    const startLog = `\n${environment.appName} starts ( Pid: ${process.pid} ) ( Cwd: ${process.cwd()} ) ( Env.: ${process.env.NODE_ENV} ) ( SqlServer: ${sqlServer} ) ( Node Port: ${port} )`; console.log(startLog);
-    this.PrivateRouter.all('/user/:id', async (req, res, next) => { try { await this.restApi(req, res, next, User); } catch (err) { next(err); } });
-    this.PublicRouter.post('/logout', async (req, res) => { this.CloseSession(req, res); });
-    this.PublicRouter.post('/login', async (req, res, next) => { await this.login(req, res, next); });
-    this.PublicRouter.get('/checkSSLlogin', async (req, res, next) => { await this.checkSSLlogin(req, res, next); });
+  public static async start(sqlServer = process.env.NODE_SQLSERVER || 'sqljs', port = process.env.NODE_PORT || '4201', app = express()) {
+    console.log(`\n${environment.appName} starts Pid=${process.pid} Env=${process.env.NODE_ENV} Debug=${this.devMode} SqlServer=${sqlServer} NodeHttpPort=${port} Cwd=${process.cwd()}`);
+    await fs.writeFile('pid', process.pid);
+    await this.createConnectionPool(sqlServer);
     await this.importAppRouters();
-    app.set('trust proxy', true);
-    app.use(bodyParser.urlencoded({ extended: true }));
-    app.use(bodyParser.json());
-    app.use(cookieParser());
+    app.use(bodyParser.urlencoded({ extended: true })); app.use(bodyParser.json()); app.use(cookieParser());
     app.use(session({ secret: 'i-love-husky', resave: false, saveUninitialized: true, cookie: { httpOnly: false } }));
-    app.use(cors({ origin: environment.origin, optionsSuccessStatus: 200 }));
-    app.get('*', async (req, res, next) => { this.debugLog('AppServer:start', `incomming request ${req.url}`); next(); });
-    if (process.env.NODE_ENV === 'PRODUCTION') {
+    app.get('*', async (req, res, next) => { this.debugLog('AppServer:start', `Incomming request ${req.url}`); next(); });
+    if (this.devMode) {
+      app.set('trust proxy', true);
+      app.use(cors({ origin: '*', optionsSuccessStatus: 200 }));
+    } else {
+      app.set('trust proxy', false);
+      app.use(cors({ origin: environment.origin, optionsSuccessStatus: 200 }));
       app.get('*.*', express.static(process.cwd() + '/html'));
       app.get('*', (req, res, next) => { if (req.url.includes('api')) { next(); } else { res.sendFile(process.cwd() + '/html/index.html'); } });
-    } else {
-      this.debugStart = -1; this.debugScope = environment.appName;
-      this.debugLog('AppServer:start' , 'DEVELOPMENT Environment: DEBUG Enabled');
     }
     app.use('/' + environment.apiPrefix, this.PublicRouter);
     app.use('/' + environment.apiPrefix, (req, res, next) => { if (!req.session.login) { next(new error.NotConnected()); } else if (req.method !== 'GET' && req.headers['x-xsrf-token'] !== req.session['x-xsrf-token']) { next(new error.NoValidXrsfTocken()); } else { next(); } });
     app.use('/' + environment.apiPrefix, this.PrivateRouter);
     app.use((req, res, next) => { if (req.url.includes('api')) { next(new error.NotValidApiUrl()); } else next(); });
     app.use((err, req, res, next) => { this.errorHandler(err, res); });
-    this.httpServerInstance = app.listen(Number(port), () => { console.log(`${environment.appName} listening on http://localhost:${port}`); });
+
+    this.httpServerInstance = app.listen(Number(port), () => {
+      if (this.devMode) console.log(`${environment.appName} is listening on http://localhost:${port}`);
+      else              console.log(`${environment.appName} is listening on port:${port}`);
+    });
+
     this.handleCrontab();
     process.on('SIGINT', () => { this.handleSIGINT(); });
     process.on('SIGUSR1', async () => { await this.handleSIGUSR1(); });
@@ -99,48 +98,51 @@ export class AppServer {
     } catch (err) { next(err); }
   }
 
-  private static CreateSessionAndCookies(req, res, user) {
-    const token = uuid();
-    req.session.login = true;
-    req.session.user = user;
-    req.session['x-xsrf-token'] = token;
-    res.cookie('XSRF-COOKIE', token);
-  }
-
-  private static CloseSession(req, res) {
-    req.session.login = false;
-    req.session.user = null;
-    req.session['x-xsrf-token'] = null;
-    res.clearCookie('XSRF-COOKIE');
-    res.json({ text: 'Loged Off' });
-  }
-
   private static async checkSSLlogin(req, res, next) {
-    this.debugLog('AppServer:checkSSLlogin' , 'checkSSLlogin(req, res)');
     const SSLlogin = req.get('SSL_CLIENT_S_DN_Email');
+    this.debugLog('AppServer:checkSSLlogin' , 'SSL_CLIENT_S_DN_Email ' + SSLlogin);
     if (SSLlogin) {
-      this.debugLog('AppServer:checkSSLlogin' , 'SSLlogin: ' + SSLlogin);
       const user = await User.getByLogin(SSLlogin);
       if (!user && !await User.getAdmin()) { User.CreateAdmin(); }
       if (user) {
         this.CreateSessionAndCookies(req, res, user);
+        this.debugLog('AppServer:checkSSLlogin' , 'User ' + user.name);
         res.json(user);
       }
     } else next();
   }
 
   private static async login(req, res , next) {
+    this.debugLog('AppServer:login' , 'Check User ' + req.body.login);
     try {
-      let user = null;
-      if (req.body.login !== '') {
-        user = await User.getByLogin(req.body.login);
-        if (!user && !await User.getAdmin()) { User.CreateAdmin(); }
-        if (user && await bcrypt.compare(req.body.pass, user.pass)) {
-          this.CreateSessionAndCookies(req, res, user);
-          res.json(user);
-        }
-      } else { next(new error.NoValidUser()); }
+      const user = await User.getByLogin(req.body.login);
+      if (user && await bcrypt.compare(req.body.pass, user.pass)) {
+        this.debugLog('AppServer:login' , 'User ' + user.name + ' is loged In');
+        this.CreateSessionAndCookies(req, res, user);
+        res.json(user);
+      } else {
+        this.debugLog('AppServer:login' , 'Authentication rejected for User ' + req.body.login + ' ' + user.name);
+        next(new error.NoValidUser());
+      }
     } catch (err) { next(err); }
+  }
+
+  private static CreateSessionAndCookies(req, res, user) {
+    const token = uuid();
+    req.session.login = true;
+    req.session.user = user;
+    req.session['X-XSFR-TOKEN'] = token;
+    res.cookie('XSRF-COOKIE', token);
+    this.debugLog('AppServer:CreateSessionAndCookies' , 'Token ' + token);
+  }
+
+  private static CloseSession(req, res) { // -> logout
+    this.debugLog('AppServer:CloseSession' , 'LogedOut');
+    req.session.login = false;
+    req.session.user = null;
+    req.session['X-XSFR-TOKEN'] = null;
+    res.clearCookie('XSRF-COOKIE');
+    res.json({ text: 'Loged Off' });
   }
 
   private static async createConnectionPool(sqlServer: string) {
@@ -169,13 +171,15 @@ export class AppServer {
   }
 
   private static errorHandler(err, res) {
-    res.status(err.httpStatus || 500);
-    if (err.httpStatus) { res.json(err); } else {
+    if (!err.httpStatus) {
       const e = error.getAppError(err);
-      if (e) { res.json(e); } else {
-        if (process.env.NODE_ENV.toUpperCase() === 'DEVELOPMENT') { res.json(err); } else { res.json(new error.InternalServerError()); }
+      if (e) err = e;
+      else {
+        console.error(err);
+        err = (this.devMode) ? new error.appError(0, 500, err.message, 'InternalServerError') : new error.InternalServerError();
       }
     }
+    res.status(err.httpStatus); res.json(err);
   }
 
   private static handleSIGINT() {
@@ -198,9 +202,9 @@ export class AppServer {
   private static handleCrontab() {
     setInterval(() => {
       // Crontab 1: handleDebugStart
-      if (typeof this.debugStart !== 'undefined' && this.debugStart !== -1 && (Date.now() - this.debugStart) > 3600000) {
+      if (this.debugStart > 0 && (Date.now() - this.debugStart) > 3600000) {
         this.debugScope = 'No Debug';
-        this.debugStart = undefined;
+        this.debugStart = -1;
         console.log('Debug Ends');
       // Crontab 2: TODO
 
@@ -208,6 +212,10 @@ export class AppServer {
   }
 
   private static async importAppRouters() {
+    this.PublicRouter.get('/checkSSLlogin', async (req, res, next) => { await this.checkSSLlogin(req, res, next); });
+    this.PublicRouter.post('/login', async (req, res, next) => { await this.login(req, res, next); });
+    this.PublicRouter.post('/logout', async (req, res) => { this.CloseSession(req, res); });
+    this.PrivateRouter.all('/user/:id', async (req, res, next) => { try { await this.restApi(req, res, next, User); } catch (err) { next(err); } });
     try {
       const routers = await fs.readdir('src/api/routers');
       routers.forEach(router => {
@@ -236,7 +244,9 @@ export class AppServer {
   }
 
   public static debugLog(scope: string, mess: string) {
-    scope = environment.appName + ':' + scope;
-    if (scope.includes(this.debugScope)) console.log(scope + ': ' + mess);
+    // scope = environment.appName + ':' + scope;
+    if (scope.includes(this.debugScope)) console.log(scope + ' ' + mess);
   }
-} AppServer.start();
+}
+
+AppServer.start();

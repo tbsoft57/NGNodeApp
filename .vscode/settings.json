@@ -27,12 +27,13 @@
     ".editorconfig": true,
     ".git": true,
     ".vscode": true,
-    "node_modules": true,
     "sqlite": true,
     "bash": true,
     "html": true,
     "bashLocal": true,
     ".gitignore": true,
-    "localStorageLogin": true
+    "localStorageLogin": true,
+    "tests/tsconfig.json": true,
+    "node_modules": true
   }
 }
