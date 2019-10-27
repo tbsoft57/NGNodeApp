@@ -27,14 +27,12 @@
     ".editorconfig": true,
     ".git": true,
     "sqlite": true,
-    "bash": true,
-    "html": true,
-    "bashLocal": true,
     ".gitignore": true,
-    "localStorageLogin": true,
-    "tests/tsconfig.json": true,
     "node_modules": true,
-    ".vscode": true
+    ".vscode": true,
+    "bash": true,
+    "bashLocal": true,
+    "localStorageLogin": true
   },
   "todo-tree.highlights.customHighlight": {
     "TODO": {

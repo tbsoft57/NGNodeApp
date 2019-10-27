@@ -1,4 +1,0 @@
-#!/bin/bash
-ln -s /home/thierry/Developpement/TestsGlobalProjets /home/thierry/Developpement/Projets/NGNodeApp/tests
-echo link created
-echo
